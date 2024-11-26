@@ -14,15 +14,19 @@ function App() {
   
     return <Register onAlreadyHaveAccount={handleAlreadyHaveAccount} />;
   };
-  
+
   const LoginWrapper = () => {
     const navigate = useNavigate();
   
     const handleLogin = () => {
       navigate('/homepage'); // Navigate to homepage after successful login
     };
+
+    const handleCreateAccount = () => {
+      navigate('/')
+    }
   
-    return <Login onClick={handleLogin} />;
+    return <Login onClick={handleLogin} onCreateAccount={handleCreateAccount}/>;
   };
   
   return (
