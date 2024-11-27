@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 import { Register, Login, Homepage } from 'cartify-frontend';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
@@ -18,7 +18,7 @@ function App() {
   const LoginWrapper = () => {
     const navigate = useNavigate();
   
-    const handleLogin = () => {
+    const handleLoginSuccess = () => {
       navigate('/homepage'); // Navigate to homepage after successful login
     };
 
@@ -26,16 +26,28 @@ function App() {
       navigate('/')
     }
   
-    return <Login onClick={handleLogin} onCreateAccount={handleCreateAccount}/>;
+    return <Login onLoginSuccess={handleLoginSuccess} onCreateAccount={handleCreateAccount}/>;
   };
   
+  const HomePageWrapper = () => {
+      const navigate = useNavigate()
+      useEffect(() => {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          console.warn('No token found. Redirecting to login')
+          navigate('/login')
+        }
+      }, [navigate])
+      return <Homepage />
+    }
+   
   return (
     <>
     <Router>
       <Routes>
         <Route path="/" element={<RegisterWrapper />} />
         <Route path="/login" element={<LoginWrapper />} />
-        <Route path="/homepage" element={<Homepage />} />
+        <Route path="/homepage" element={<HomePageWrapper />} />
       </Routes>
     </Router>
     </>
