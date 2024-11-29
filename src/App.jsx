@@ -1,11 +1,32 @@
 import { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import './App.css';
-import { Register, Login, Homepage } from 'cartify-frontend';
+import { Register, Login, Homepage, Contact, About, CheckOut } from 'cartify-frontend';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 function App() {
+  const [cart, setCart] = useState(() => 
+  {
+    const storedCart = localStorage.getItem('cart');
+    return storedCart ? JSON.parse(storedCart) : [];
+  });
   const [username, setUsername] = useState('Guest');
+  useEffect(() => {
+    console.log("Cart updated:", cart);
+  }, [cart]);
+  
+
+  const addToCart = (product) => {
+    const updatedCart = [...cart, product];
+    setCart(updatedCart);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  };
+
+  const removeFromCart = (productId) => {
+    const updatedCart = cart.filter((item) => item.id !== productId);
+    setCart(updatedCart);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  };
 
   const decodeToken = () => {
     const token = localStorage.getItem('token');
@@ -13,56 +34,81 @@ function App() {
       try {
         const decoded = jwtDecode(token);
         console.log('Decoded Token:', decoded);
-        setUsername(decoded.username || 'Guest'); // Extract the username
+        setUsername(decoded.username || 'Guest'); 
       } catch (error) {
         console.error('Error decoding token:', error);
         setUsername('Guest');
       }
     }
   };
-  
 
   const RegisterWrapper = () => {
     const navigate = useNavigate();
-
-    const handleAlreadyHaveAccount = () => {
-      navigate('/login');
-    };
-
+    const handleAlreadyHaveAccount = () => navigate('/login');
     return <Register onAlreadyHaveAccount={handleAlreadyHaveAccount} />;
   };
 
   const LoginWrapper = () => {
     const navigate = useNavigate();
-
     const handleLoginSuccess = () => {
-      const token = localStorage.getItem('token');
-      if (token) decodeToken();
+      decodeToken();
       navigate('/homepage');
     };
-
-    const handleCreateAccount = () => {
-      navigate('/');
-    };
-
+    const handleCreateAccount = () => navigate('/');
     return <Login onLoginSuccess={handleLoginSuccess} onCreateAccount={handleCreateAccount} />;
   };
 
-  const HomePageWrapper = () => {
+  const HomepageWrapper = () => {
     const navigate = useNavigate();
-  
+    useEffect(() => {
+      const token = localStorage.getItem('token');
+      if (!token) navigate('/login');
+      else decodeToken();
+    }, [navigate]);
+    return <Homepage username={username} addToCart={addToCart} />;
+  };
+
+  const AboutPageWrapper = () => {
+    const navigate = useNavigate();
+    useEffect(() => {
+      const token = localStorage.getItem('token');
+      if (!token) navigate('/login');
+      else decodeToken();
+    }, [navigate]);
+    return <About username={username} />;
+  };
+
+  const ContactPageWrapper = () => {
+    const navigate = useNavigate();
+    useEffect(() => {
+      const token = localStorage.getItem('token');
+      if (!token) navigate('/login');
+      else decodeToken();
+    }, [navigate]);
+    return <Contact username={username} />;
+  };
+
+  const CheckoutPageWrapper = () => {
+    const navigate = useNavigate();
+
     useEffect(() => {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.warn('No token found. Redirecting to login');
-        navigate('/login');
+        navigate('/login'); 
       } else {
-        decodeToken();
+        decodeToken(); 
       }
     }, [navigate]);
   
-    return <Homepage username={username} />;
+    return (
+      <CheckOut
+        username={username}
+        products={cart}
+        removeFromCart={removeFromCart}
+      />
+    );
   };
+  
   
 
   return (
@@ -70,7 +116,10 @@ function App() {
       <Routes>
         <Route path="/" element={<RegisterWrapper />} />
         <Route path="/login" element={<LoginWrapper />} />
-        <Route path="/homepage" element={<HomePageWrapper />} />
+        <Route path="/homepage" element={<HomepageWrapper />} />
+        <Route path="/contact" element={<ContactPageWrapper />} />
+        <Route path="/about" element={<AboutPageWrapper />} />
+        <Route path="/checkout" element={<CheckoutPageWrapper />} />
       </Routes>
     </Router>
   );
