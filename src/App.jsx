@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import './App.css';
-import { Register, Login, Homepage, Contact, About, CheckOut } from 'cartify-frontend';
+import { Register, Login, Homepage, Contact, About, CheckOut, OrderSuccess } from 'cartify-frontend';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 function App() {
@@ -91,6 +91,11 @@ function App() {
   const CheckoutPageWrapper = () => {
     const navigate = useNavigate();
 
+    const handleCompleteOrder = () => {
+      localStorage.removeItem('cart')
+      console.log("Order completed. Navigating to order complete page...");
+      navigate('/order-complete');
+    }
     useEffect(() => {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -105,8 +110,20 @@ function App() {
         username={username}
         products={cart}
         removeFromCart={removeFromCart}
+        onCompleteOrder={handleCompleteOrder}
       />
     );
+  };
+  
+  const OrderCompleteWrapper = () => {
+    const navigate = useNavigate();
+  
+    const handleReturnToHomepage = () => {
+      localStorage.removeItem('cart'); 
+      navigate('/homepage'); 
+    };
+  
+    return <OrderSuccess username={username} onReturnToHomepage={handleReturnToHomepage} />;
   };
   
   
@@ -120,6 +137,7 @@ function App() {
         <Route path="/contact" element={<ContactPageWrapper />} />
         <Route path="/about" element={<AboutPageWrapper />} />
         <Route path="/checkout" element={<CheckoutPageWrapper />} />
+        <Route path="/order-complete" element={<OrderCompleteWrapper />} />
       </Routes>
     </Router>
   );
