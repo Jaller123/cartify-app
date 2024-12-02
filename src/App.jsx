@@ -58,15 +58,33 @@ function App() {
     return <Login onLoginSuccess={handleLoginSuccess} onCreateAccount={handleCreateAccount} />;
   };
 
+  
+
   const HomepageWrapper = () => {
     const navigate = useNavigate();
+  
+    const handleLogout = () => {
+      localStorage.removeItem("token"); // Clear the token
+      localStorage.removeItem("cart"); // Clear the cart
+      setUsername("Guest"); // Reset username state
+      navigate("/login"); // Navigate to login page
+    };
+  
     useEffect(() => {
-      const token = localStorage.getItem('token');
-      if (!token) navigate('/login');
+      const token = localStorage.getItem("token");
+      if (!token) navigate("/login");
       else decodeToken();
     }, [navigate]);
-    return <Homepage username={username} addToCart={addToCart} />;
+  
+    return (
+      <Homepage
+        username={username}
+        addToCart={addToCart}
+        onLogout={handleLogout} // Pass the logout handler
+      />
+    );
   };
+  
 
   const AboutPageWrapper = () => {
     const navigate = useNavigate();
