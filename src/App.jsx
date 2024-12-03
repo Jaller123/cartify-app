@@ -28,6 +28,12 @@ function App() {
     localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token'); 
+    localStorage.removeItem('cart'); 
+    setUsername('Guest');
+  };
+
   const decodeToken = () => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -63,13 +69,6 @@ function App() {
   const HomepageWrapper = () => {
     const navigate = useNavigate();
   
-    const handleLogout = () => {
-      localStorage.removeItem("token"); // Clear the token
-      localStorage.removeItem("cart"); // Clear the cart
-      setUsername("Guest"); // Reset username state
-      navigate("/login"); // Navigate to login page
-    };
-  
     useEffect(() => {
       const token = localStorage.getItem("token");
       if (!token) navigate("/login");
@@ -93,7 +92,7 @@ function App() {
       if (!token) navigate('/login');
       else decodeToken();
     }, [navigate]);
-    return <About username={username} />;
+    return <About username={username} onLogout={handleLogout} />;
   };
 
   const ContactPageWrapper = () => {
@@ -103,7 +102,7 @@ function App() {
       if (!token) navigate('/login');
       else decodeToken();
     }, [navigate]);
-    return <Contact username={username} />;
+    return  <Contact username={username} onLogout={handleLogout} />
   };
 
   const CheckoutPageWrapper = () => {
