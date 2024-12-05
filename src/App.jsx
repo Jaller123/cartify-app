@@ -1,32 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { CartProvider, useCart } from './assets/context/CartContext';
 import './App.css';
 import { Register, Login, Homepage, Contact, About, CheckOut, OrderSuccess } from 'cartify-frontend';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 function App() {
-  const [cart, setCart] = useState(() => 
-  {
-    const storedCart = localStorage.getItem('cart');
-    return storedCart ? JSON.parse(storedCart) : [];
-  });
   const [username, setUsername] = useState('Guest');
-  useEffect(() => {
-    console.log("Cart updated:", cart);
-  }, [cart]);
-  
-
-  const addToCart = (product) => {
-    const updatedCart = [...cart, product];
-    setCart(updatedCart);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
-  };
-
-  const removeFromCart = (productId) => {
-    const updatedCart = cart.filter((item) => item.id !== productId);
-    setCart(updatedCart);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('token'); 
@@ -78,8 +58,7 @@ function App() {
     return (
       <Homepage
         username={username}
-        addToCart={addToCart}
-        onLogout={handleLogout} // Pass the logout handler
+        onLogout={handleLogout} 
       />
     );
   };
@@ -107,30 +86,33 @@ function App() {
 
   const CheckoutPageWrapper = () => {
     const navigate = useNavigate();
-
-    const handleCompleteOrder = () => {
-      localStorage.removeItem('cart')
-      console.log("Order completed. Navigating to order complete page...");
-      navigate('/order-complete');
-    }
+    const { setCart } = useCart(); 
+  
     useEffect(() => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        navigate('/login'); 
+        navigate("/login");
       } else {
-        decodeToken(); 
+        decodeToken();
       }
     }, [navigate]);
+  
+    const onCompleteOrder = () => {
+      localStorage.removeItem("cart"); 
+      setCart([]); 
+      navigate("/order-complete"); 
+    };
   
     return (
       <CheckOut
         username={username}
-        products={cart}
-        removeFromCart={removeFromCart}
-        onCompleteOrder={handleCompleteOrder}
+        onLogout={handleLogout}
+        onCompleteOrder={onCompleteOrder} 
       />
     );
   };
+  
+  
   
   const OrderCompleteWrapper = () => {
     const navigate = useNavigate();
@@ -146,6 +128,7 @@ function App() {
   
 
   return (
+    <CartProvider>
     <Router>
       <Routes>
         <Route path="/" element={<RegisterWrapper />} />
@@ -157,6 +140,7 @@ function App() {
         <Route path="/order-complete" element={<OrderCompleteWrapper />} />
       </Routes>
     </Router>
+    </CartProvider>
   );
 }
 
