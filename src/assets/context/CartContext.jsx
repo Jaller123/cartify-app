@@ -18,9 +18,9 @@ export const CartProvider = ({ children }) => {
     });
   }, []);
 
-  const removeFromCart = useCallback((productId) => {
+  const removeFromCart = useCallback((indexToRemove) => {
     setCart((prevCart) => {
-      const updatedCart = prevCart.filter((item) => item.id !== productId);
+      const updatedCart = prevCart.filter((_, index) => index !== indexToRemove);
       localStorage.setItem("cart", JSON.stringify(updatedCart));
       return updatedCart;
     });

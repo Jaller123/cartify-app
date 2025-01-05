@@ -7,6 +7,30 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 
 function App() {
   const [username, setUsername] = useState('Guest');
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const handleFormChange = (e, field) => {
+    const value = e.target.value;
+  
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+   
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSuccessMessage('Your message has been sent successfully!');
+      setFormData({ name: '', email: '', phone: '' });
+    }, 2000);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token'); 
@@ -75,14 +99,26 @@ function App() {
   };
 
   const ContactPageWrapper = () => {
-    const navigate = useNavigate();
-    useEffect(() => {
-      const token = localStorage.getItem('token');
-      if (!token) navigate('/login');
-      else decodeToken();
-    }, [navigate]);
-    return  <Contact username={username} onLogout={handleLogout} />
-  };
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) navigate('/login');
+    else decodeToken();
+  }, [navigate]);
+
+  return (
+    <Contact
+      username={username}
+      onLogout={handleLogout}
+      formData={formData}
+      isSubmitting={isSubmitting}
+      successMessage={successMessage}
+      onFormChange={handleFormChange}
+      onFormSubmit={handleFormSubmit}
+    />
+  );
+};
 
   const CheckoutPageWrapper = () => {
     const navigate = useNavigate();
